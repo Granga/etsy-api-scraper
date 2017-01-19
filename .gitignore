@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Transpiled files
+build/
+
+# VS Code
+.vscode
+!.vscode/tasks.js
+
+# JetBrains IDEs
+.idea/
+
+# Optional npm cache directory
+.npm
+
+src/**/*.js
+js/
+output/
