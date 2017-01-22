@@ -4,8 +4,8 @@ import EntityParser from "./parsers/EntityParser";
 import Files from "./Files";
 import MethodsParser from "./parsers/MethodsParser";
 import FieldsParser from "./parsers/FieldsParser";
-import Fields from "./tsConverters/Fields";
-import Methods from "./tsConverters/Methods";
+import ApiClass from "./tsConverters/ApiClass";
+import * as templates from "./tsConverters/Templates";
 import cheerio = require("cheerio");
 import _ = require("lodash");
 import tp = require("cheerio-tableparser");
@@ -30,31 +30,33 @@ export default class Scraper {
 
     private static startOffline() {
         let fileNames = Files.getFileList("html");
+        let getters = "";
+        let imports = "";
 
         fileNames.forEach((fileName, index) => {
             console.log(`--> ${index + 1}/${fileNames.length} ${fileName}`);
-            let $ = cheerio.load(Files.load("html", fileName));
+            let $ = cheerio.load(Files.read("html", fileName));
 
             let entityName = EntityParser.parseName($);
 
             let methods = MethodsParser.parse($);
             let fields = FieldsParser.parse($, $("#resource_fields").get(0));
 
-            let imports =
-                'import * as Bluebird from "bluebird";\n' +
-                'import {request} from "../common/HttpRequest";\n' +
-                'import {IStandardParameters} from "../common/IStandardParameters";\n' +
-                'import {IStandardResponse} from "../common/IStandardResponse";\n';
+            let ts = ApiClass.toTypescript(entityName, fields, methods);
 
-            let fieldsTS = Fields.toTypescript(fields, "interface", "I" + entityName);
-            let methodsTS = Methods.toTypescript(methods);
+            Files.write("api", entityName, ts);
 
-            let typescript = imports + "\n\n" + fieldsTS + "\n\n" + methodsTS;
-
-            Files.write("api", entityName, typescript);
+            getters += templates.clientGetterTemplate(entityName);
+            imports += `import {${entityName}} from "../api/${entityName}";\n`;
         });
 
-        Files.createReExportsFile();
+        let etsyApiClientTS = fs.readFileSync(Files.etsyApiClientPath).toString();
+        getters = `//api start\n${getters}\n//api end`;
+        imports = `//imports start\n${imports}\n//imports end`;
+
+        etsyApiClientTS = _.replace(etsyApiClientTS, /\/\/api start([^}]*)\/\/api end/, getters);
+        etsyApiClientTS = _.replace(etsyApiClientTS, /\/\/imports start([^}]*)\/\/imports end/, imports);
+        fs.writeFileSync(Files.etsyApiClientPath, etsyApiClientTS);
     }
 
     private static async downloadDocumentation() {

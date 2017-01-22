@@ -6,8 +6,9 @@ export default class Files {
     static outputDir = Path.join(__dirname, "../", "/output");
     static htmlDir = Path.join(Files.outputDir, "/html");
     static jsonDir = Path.join(Files.outputDir, "/json");
-    static etsyTsSrcDir = Path.join("../../", "/etsy-ts/src")
+    static etsyTsSrcDir = Path.join("../../", "/etsy-ts/src");
     static apiDir = Path.join(Files.etsyTsSrcDir, "api");
+    static etsyApiClientPath = Path.join(Files.etsyTsSrcDir, "/client/EtsyApiClient.ts");
 
     static createDirs() {
         let dirs = [this.outputDir, this.htmlDir, this.jsonDir, this.apiDir];
@@ -29,7 +30,7 @@ export default class Files {
         fs.writeFileSync(path, content);
     }
 
-    static load(type: "html" | "entityJson", name: string): string {
+    static read(type: "html" | "entityJson", name: string): string {
         if (type == "html")
             name = name.replace(".html", "");
 
