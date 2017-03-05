@@ -32,7 +32,13 @@ export default class Fields {
 
         if (type.startsWith("array")) {
             type = type.match(/array\(([^)]+)\)/)[1];
-            return this.mapType(type) + "[]";
+            let tsType = this.mapType(type);
+            if (tsType.indexOf("|") > -1) {
+                return `(${tsType})[]`;
+            }
+            else {
+                return `${tsType}[]`;
+            }
         }
 
         else if (type.startsWith("enum")) {

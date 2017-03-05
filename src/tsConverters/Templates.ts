@@ -2,7 +2,7 @@ import {IMethod} from "../interfaces";
 export function classTemplate(name: string, fieldsInterfaceTS: string, parameterInterfacesTS: string, methodsTS: string) {
     return `import {IStandardParameters} from "../client/IStandardParameters";
 import {EtsyApiClient} from "../client/EtsyApiClient";
-import {IStandardResponse} from "../client/IStandardResponse"
+import {IStandardResponse} from "../client/IStandardResponse";
 
 ${fieldsInterfaceTS}
 
