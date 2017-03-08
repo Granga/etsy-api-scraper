@@ -3,7 +3,7 @@ import Fields from "./Fields";
 import * as templates from "./Templates";
 import _ = require("lodash");
 
-export default class ApiClass {
+export default class ApiModule {
 
     static toTypescript(name: string, fields: IField[], methods: IMethod[]) {
 
@@ -23,8 +23,7 @@ export default class ApiClass {
             return ts + "\n" + templates.interfaceTemplate(parametersInterfaceName, "extends IStandardParameters", fieldsTS);
         }, "");
 
-        let classTS = templates.classTemplate(name, fieldsInterface, parameterInterfacesTS, methodsTS);
-
+        let classTS = templates.module(name, fieldsInterface, parameterInterfacesTS, methodsTS, methods.map(m => m.methodName));
 
         return classTS;
     }

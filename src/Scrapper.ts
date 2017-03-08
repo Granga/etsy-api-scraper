@@ -1,6 +1,6 @@
 ///<reference path="./typings.d.ts"/>
 import * as rp from "request-promise";
-import EntityParser from "./parsers/EntityParser";
+import ModuleParser from "./parsers/EntityParser";
 import Files from "./Files";
 import MethodsParser from "./parsers/MethodsParser";
 import FieldsParser from "./parsers/FieldsParser";
@@ -30,33 +30,26 @@ export default class Scraper {
 
     private static startOffline() {
         let fileNames = Files.getFileList("html");
-        let getters = "";
-        let imports = "";
+        let moduleNames: string[] = [];
 
         fileNames.forEach((fileName, index) => {
             console.log(`--> ${index + 1}/${fileNames.length} ${fileName}`);
             let $ = cheerio.load(Files.read("html", fileName));
 
-            let entityName = EntityParser.parseName($);
+            let moduleName = ModuleParser.parseName($);
+            moduleNames.push(moduleName);
 
             let methods = MethodsParser.parse($);
             let fields = FieldsParser.parse($, $("#resource_fields").get(0));
 
-            let ts = ApiClass.toTypescript(entityName, fields, methods);
+            let ts = ApiClass.toTypescript(moduleName, fields, methods);
 
-            Files.write("api", entityName, ts);
-
-            getters += templates.clientGetterTemplate(entityName);
-            imports += `import {${entityName}} from "../api/${entityName}";\n`;
+            Files.write("api", moduleName, ts);
         });
 
-        let etsyApiClientTS = fs.readFileSync(Files.etsyApiClientPath).toString();
-        getters = `//api start\n${getters}\n//api end`;
-        imports = `//imports start\n${imports}\n//imports end`;
+        let index = templates.index(moduleNames);
 
-        etsyApiClientTS = _.replace(etsyApiClientTS, /\/\/api start([^}]*)\/\/api end/, getters);
-        etsyApiClientTS = _.replace(etsyApiClientTS, /\/\/imports start([^}]*)\/\/imports end/, imports);
-        fs.writeFileSync(Files.etsyApiClientPath, etsyApiClientTS);
+        fs.writeFileSync(Files.indexPath, index);
     }
 
     private static async downloadDocumentation() {
@@ -64,7 +57,7 @@ export default class Scraper {
         let urls = await this.getUrls();
         for (let url of urls) {
             let $ = await this.getCheerio(url);
-            let entityName = EntityParser.parseName($);
+            let entityName = ModuleParser.parseName($);
 
             console.log(`--> ${urls.indexOf(url) + 1}/${urls.length} ${entityName}`);
 
