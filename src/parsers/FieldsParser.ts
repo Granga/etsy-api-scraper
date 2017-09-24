@@ -1,14 +1,14 @@
-import {IField} from "../interfaces";
+import {IParsedField} from "../interfaces";
 import {camelCase} from "lodash";
 import tableparser = require("cheerio-tableparser");
 import cheerio = require("cheerio");
 
 
 export default class FieldsParser {
-    static parse($: CheerioStatic, fieldsTable: CheerioElement): IField[] {
+    static parse($: CheerioStatic, fieldsTable: CheerioElement): IParsedField[] {
         tableparser($);
         let data = $(fieldsTable).parsetable();
-        let result: IField[] = [];
+        let result: IParsedField[] = [];
 
         for (let r = 1; r < data[0].length; r++) {
             for (let c = 0; c < data.length; c++) {

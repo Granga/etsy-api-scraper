@@ -1,55 +1,80 @@
-import {IMethod} from "../interfaces";
-export function module(moduleName: string, fieldsInterfaceTS: string, parameterInterfacesTS: string, methodsTS: string, methodNames: string[]) {
-    return `
-import {IOptions} from "../client/client";
-import {IStandardParameters} from "../client/IStandardParameters";
-import {IStandardResponse} from "../client/IStandardResponse";
-import {request} from "../client/client";
+import {Interface} from "../REST/Interface";
+import {Method} from "../REST/Method";
+import {Module} from "../REST/Module";
+import {Parameter} from "../REST/Parameter";
+import {Property} from "../REST/Property";
 
-//fields
-${fieldsInterfaceTS.trim()}
+export class Templates {
+    static module(module: Module) {
+        return `
+        import {IOptions} from "../client/client";
+        import {IStandardParameters} from "../client/IStandardParameters";
+        import {IStandardResponse} from "../client/IStandardResponse";
+        import {request} from "../client/client";
+        
+        ${module.propertiesInterface.toString()}
+        
+        ${module.methods.map(method => method.parametersInterface.toString()).join("\n")}
+        
+        ${module.methods.map(method => method.toString()).join("\n")}
+        
+        export const ${module.name} = { ${module.methods.map(method => method.name).join(",")} };
+        `;
+    }
 
-//parameters types
-${parameterInterfacesTS.trim()}
-
-//methods
-${methodsTS.trim()}
-
-${methodCollectionExport(moduleName, methodNames).trim()}
-`.trim();
-}
-
-export function index(moduleNames: string[]) {
-    return `
+    static index(moduleNames: string[]) {
+        return `
 export {IOptions} from "./client/client";
 export * from "./client/IStandardParameters";
 export * from "./client/IStandardResponse";
-${moduleNames.map(m => exportModule(m, "./api")).join("\n")}
+${moduleNames.map(m => this.exportModule(m, "./api")).join("\n")}
 `.trim();
-}
+    }
 
-export function exportModule(moduleName: string, relativePath: string) {
-    return `export * from "${relativePath}/${moduleName}";`
-}
+    static exportModule(moduleName: string, relativePath: string) {
+        return `export * from "${relativePath}/${moduleName}";`
+    }
 
-export function interfaceTemplate(name: string, extendsTS: string, fieldsTS: string) {
-    return `
-export interface ${name} ${extendsTS} {
-    ${fieldsTS}
-}`.trim();
-}
+    static interface(iface: Interface) {
+        return `
+        export interface ${iface.name} {
+            ${iface.body}
+        }
+        `;
+    }
 
-export function methodTemplate(method: IMethod, parametersInterfaceName: string) {
-    return `
-/**
-* ${method.synopsis}
-*/
-function ${method.methodName} <TResult>(parameters: ${parametersInterfaceName}, options?: IOptions): Promise<IStandardResponse<${parametersInterfaceName}, TResult>> {
-    return request<${parametersInterfaceName}, TResult>("${method.uri}", parameters, "${method.httpMethod}", options);
-}`.trim();
-}
+    static extendedInterface(iface: Interface) {
+        return `
+        export interface ${iface.name} extends ${iface.extendedBy.join(",")} {
+            ${iface.body}
+        }
+        `;
+    }
 
-export function methodCollectionExport(moduleName: string, methodNames: string[]) {
-    return `export const ${moduleName} = { ${methodNames.join(", ")} };`
+    static method(method: Method) {
+        return `
+        /**
+        * ${method.description}
+        */
+        function ${method.name} <TResult>(parameters: ${method.parametersInterface.name}, options?: IOptions): Promise<IStandardResponse<${method.parametersInterface.name}, TResult>> {
+            return request<${method.parametersInterface.name}, TResult>("${method.uri}", parameters, "${method.http_method}", options);
+        }`;
+    }
+
+
+    static parameter(parameter: Parameter) {
+        return `${parameter.name}${parameter.required ? "" : "?"}: ${parameter.type.toString()}`;
+    }
+
+    static property(property: Property) {
+        return `
+        /**
+        * ${property.description}
+        * visibilityLevel: ${property.visibilityLevel}
+        * permissionScope: ${property.permissionScope}
+        */
+        ${property.name}: ${property.type.toString()}
+        `;
+    }
 }
 

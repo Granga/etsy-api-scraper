@@ -1,7 +1,7 @@
 export interface IEntity {
     name: string,
-    fields: IField[],
-    methods: IMethod[]
+    fields: IParsedField[],
+    methods: IParsedMethod[]
 }
 
 export interface ITypescriptFile {
@@ -9,7 +9,10 @@ export interface ITypescriptFile {
     content: string
 }
 
-export interface IField {
+export interface IParsedField {
+    permissionScope: PermissionScope;
+    visibilityLevel: Visibility;
+    description: string;
     field?: string,
     name?: string,
     required: string,
@@ -17,13 +20,36 @@ export interface IField {
     type: string
 }
 
-export interface IMethod {
+export interface IParsedMethod {
     docUrl: string,
     methodName: string,
     synopsis: string,
-    httpMethod: string,
+    httpMethod: HttpMethod,
     uri: string,
-    parameters: IField[],
+    parameters: IParsedField[],
     requiresOAuth: string,
     permissionScope: string
+}
+
+export type HttpMethod = "GET" | "POST" | "DELETE" | "PUT";
+
+export type Visibility = "public" | "private";
+
+export type PermissionScope = "none" | string;
+
+export interface IApiMethodJson {
+    name: string;
+    description: string;
+    uri: string;
+    params: object;
+    defaults: object;
+    type: string;
+    visibility: Visibility;
+    http_method: HttpMethod;
+}
+
+export interface IParsedModule {
+    name: string;
+    methods: IParsedMethod[];
+    fields: IParsedField[];
 }
