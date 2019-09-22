@@ -15,9 +15,11 @@ export interface IParsedField {
     description: string;
     field?: string,
     name?: string,
-    required: string,
-    default: string,
-    type: string
+    required?: string,
+    default?: string,
+    type: string,
+    isDeprecated: boolean,
+    deprecatedDescription?: string
 }
 
 export interface IParsedMethod {

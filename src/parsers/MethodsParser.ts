@@ -1,10 +1,10 @@
-import {IParsedMethod, IParsedField} from "../interfaces";
+import {IMethod, IField} from "../interfaces";
 import FieldsParser from "./FieldsParser";
 import {camelCase, uniqBy} from "lodash";
 
 export default class MethodsParser {
-    static parse($: CheerioStatic): IParsedMethod[] {
-        let result: IParsedMethod[] = [];
+    static parse($: CheerioStatic): IMethod[] {
+        let result: IMethod[] = [];
 
         let methodTables = $("table.api_method");
 
@@ -18,9 +18,9 @@ export default class MethodsParser {
             trs.each((index, tr) => {
                 let th = $(tr).find("th");
                 let td = $(tr).find("td");
-                let methodParamsTable = td.find("table.api_method_params").get(0);
+                let methodParamsTable = td.find("table.api_method_params").eq(0);
 
-                if (!methodParamsTable) {
+                if (methodParamsTable.length == 0) {
                     method[camelCase(th.text().trim())] = td.text().trim();
                 }
                 else {
@@ -32,7 +32,7 @@ export default class MethodsParser {
                 method.parameters = [];
             }
 
-            result.push(method as IParsedMethod);
+            result.push(method as IMethod);
         });
 
         result = uniqBy(result, m => m.methodName);
@@ -41,7 +41,7 @@ export default class MethodsParser {
         return result;
     }
 
-    static parseParameters($: CheerioStatic, paramsTable: CheerioElement): IParsedField[] {
+    static parseParameters($: CheerioStatic, paramsTable: Cheerio): IField[] {
         return FieldsParser.parse($, paramsTable);
     }
 }
