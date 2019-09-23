@@ -1,4 +1,4 @@
-import {IMethod, IField} from "../interfaces";
+import {IField, IMethod} from "../interfaces";
 import Fields from "./Fields";
 import * as templates from "./Templates";
 import _ = require("lodash");

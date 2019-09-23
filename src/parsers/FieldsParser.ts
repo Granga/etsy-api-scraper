@@ -15,20 +15,17 @@ export default class FieldsParser {
             };
             let row = this.getRow(r, fieldsTable);
 
-            if (this.getCell(r, 0, fieldsTable).attr("colspan") == "4") {
-                // field in previous row is deprecated
-                field = result[result.length - 1];
-                if (field) {
-                    field.deprecatedDescription = this.getCell(r, 0, fieldsTable).text().trim();
-                }
-                continue;
-            }
-
             for (let c = 0; c < numCols; c++) {
                 let th = this.getHeader(0, c, fieldsTable);
                 let cell = this.getCell(r, c, fieldsTable);
-                field.isDeprecated = row.is(".deprecated");
                 field[camelCase(th.text().trim())] = cell.text().trim();
+            }
+
+            field.isDeprecated = row.is(".deprecated");
+            if (row.next().is(".deprecated") && row.next().find("td").length == 1) {
+                field.deprecatedDescription = row.next().text().trim();
+                r++;
+                continue;
             }
 
             result.push(field);

@@ -15,6 +15,7 @@ export interface IField {
     required?: string,
     default?: string,
     type: string,
+    description?: string,
     isDeprecated: boolean,
     deprecatedDescription?: string
 }

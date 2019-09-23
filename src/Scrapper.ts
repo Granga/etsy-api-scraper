@@ -1,16 +1,13 @@
 ///<reference path="./typings.d.ts"/>
 import * as rp from "request-promise";
-import ModuleParser from "./parsers/EntityParser";
 import Files from "./Files";
-import MethodsParser from "./parsers/MethodsParser";
+import ModuleParser from "./parsers/EntityParser";
 import FieldsParser from "./parsers/FieldsParser";
+import MethodsParser from "./parsers/MethodsParser";
 import ApiClass from "./tsConverters/ApiClass";
 import * as templates from "./tsConverters/Templates";
 import cheerio = require("cheerio");
-import _ = require("lodash");
-import tp = require("cheerio-tableparser");
 import fs = require("fs");
-import Path = require("path");
 
 
 export default class Scraper {

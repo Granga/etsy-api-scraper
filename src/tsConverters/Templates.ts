@@ -56,10 +56,13 @@ export function methodCollectionExport(moduleName: string, methodNames: string[]
 }
 
 export function fieldTemplate(field: IField, isLast: boolean) {
-    let deprecatedDescription = field.isDeprecated ?
-        `/**\n* @deprecated ${field.deprecatedDescription}\n*/\n`
+    let description = field.description ? `\n* ${field.description}` : "";
+    let deprecation = field.isDeprecated ? `\n@deprecated ${field.deprecatedDescription || ""}` : "";
+
+    let comment = description.length > 0 || deprecation.length > 0
+        ? `/**${deprecation}${description}\n*/\n`
         : "";
 
-    return `${deprecatedDescription}${field.field || field.name}${field.required == "N" ? '?' : ''}: ${Fields.mapType(field.type)}${isLast ? '' : ',\n'}`;
+    return `${comment}${field.field || field.name}${field.required == "N" ? '?' : ''}: ${Fields.mapType(field.type)}${isLast ? '' : ',\n'}`;
 }
 

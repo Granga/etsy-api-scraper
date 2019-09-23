@@ -1,6 +1,6 @@
-import {IMethod, IField} from "../interfaces";
-import FieldsParser from "./FieldsParser";
 import {camelCase, uniqBy} from "lodash";
+import {IField, IMethod} from "../interfaces";
+import FieldsParser from "./FieldsParser";
 
 export default class MethodsParser {
     static parse($: CheerioStatic): IMethod[] {

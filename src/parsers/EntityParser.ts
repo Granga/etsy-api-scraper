@@ -1,4 +1,4 @@
-import {upperFirst, camelCase} from "lodash";
+import {camelCase, upperFirst} from "lodash";
 
 export default class EntityParser {
     static parseName($: CheerioStatic): string {
