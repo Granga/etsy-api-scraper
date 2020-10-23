@@ -1,7 +1,7 @@
-import {IField, IMethod} from "../interfaces";
+import { IField, IMethod } from "../interfaces";
 import Fields from "./Fields";
 
-export function module(moduleName: string, fieldsInterfaceTS: string, parameterInterfacesTS: string, methodsTS: string, methodNames: string[]) {
+export function module(moduleName: string, fieldsInterfaceTS: string, parameterInterfacesTS: string, methodsClassTS: string, methodNames: string[]) {
     return `
 import {IOptions} from "../client/client";
 import {IStandardParameters} from "../client/IStandardParameters";
@@ -14,10 +14,8 @@ ${fieldsInterfaceTS.trim()}
 //parameters types
 ${parameterInterfacesTS.trim()}
 
-//methods
-${methodsTS.trim()}
-
-${methodCollectionExport(moduleName, methodNames).trim()}
+//methods class
+${methodsClassTS.trim()}
 `.trim();
 }
 
@@ -41,18 +39,21 @@ export interface ${name} ${extendsTS} {
 }`.trim();
 }
 
+export function methodClassTemplate(name: string, methodsTS: string) {
+    return `export class ${name} { 
+    ${methodsTS}
+}
+`.trim();
+}
+
 export function methodTemplate(method: IMethod, parametersInterfaceName: string) {
     return `
 /**
 * ${method.synopsis}
 */
-function ${method.methodName} <TResult>(parameters: ${parametersInterfaceName}, options?: IOptions): Promise<IStandardResponse<${parametersInterfaceName}, TResult>> {
+static ${method.methodName} <TResult>(parameters: ${parametersInterfaceName}, options?: IOptions): Promise<IStandardResponse<${parametersInterfaceName}, TResult>> {
     return request<${parametersInterfaceName}, TResult>("${method.uri}", parameters, "${method.httpMethod}", options);
 }`.trim();
-}
-
-export function methodCollectionExport(moduleName: string, methodNames: string[]) {
-    return `export const ${moduleName} = { ${methodNames.join(", ")} };`
 }
 
 export function fieldTemplate(field: IField, isLast: boolean) {

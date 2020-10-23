@@ -1,5 +1,6 @@
 import {IField, IMethod} from "../interfaces";
 import Fields from "./Fields";
+import { methodClassTemplate } from "./Templates";
 import * as templates from "./Templates";
 import _ = require("lodash");
 
@@ -16,6 +17,8 @@ export default class ApiModule {
             return ts + "\n" + templates.methodTemplate(method, parametersInterfaceName);
         }, "");
 
+        let methodsClassTS = methodClassTemplate(name, methodsTS);
+
         let parameterInterfacesTS = methods.reduce<string>((ts, method) => {
             let parametersInterfaceName = this.toInterfaceName(method.methodName);
             let fieldsTS = Fields.toTypescript(method.parameters, "parameters");
@@ -23,7 +26,7 @@ export default class ApiModule {
             return ts + "\n" + templates.interfaceTemplate(parametersInterfaceName, "extends IStandardParameters", fieldsTS);
         }, "");
 
-        let classTS = templates.module(name, fieldsInterface, parameterInterfacesTS, methodsTS, methods.map(m => m.methodName));
+        let classTS = templates.module(name, fieldsInterface, parameterInterfacesTS, methodsClassTS, methods.map(m => m.methodName));
 
         return classTS;
     }
