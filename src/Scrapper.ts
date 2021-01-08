@@ -44,9 +44,9 @@ export default class Scraper {
             Files.write("api", moduleName, ts);
         });
 
-        let index = templates.index(moduleNames);
+        let entities = templates.entities(moduleNames);
 
-        fs.writeFileSync(Files.indexPath, index);
+        fs.writeFileSync(Files.entitiesPath, entities);
     }
 
     private static async downloadDocumentation() {

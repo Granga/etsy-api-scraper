@@ -1,6 +1,6 @@
 import fs = require("fs");
 import Path = require("path");
-import {upperFirst} from "lodash";
+import { upperFirst } from "lodash";
 
 export default class Files {
     static outputDir = Path.join(__dirname, "../", "/output");
@@ -8,7 +8,7 @@ export default class Files {
     static jsonDir = Path.join(Files.outputDir, "/json");
     static etsyTsSrcDir = Path.join("../", "/etsy-ts/src");
     static apiDir = Path.join(Files.etsyTsSrcDir, "api");
-    static indexPath = Path.join(Files.etsyTsSrcDir, "/index.ts");
+    static entitiesPath = Path.join(Files.etsyTsSrcDir, "client", "Entities.ts");
 
     static createDirs() {
         let dirs = [this.outputDir, this.htmlDir, this.jsonDir, this.apiDir];

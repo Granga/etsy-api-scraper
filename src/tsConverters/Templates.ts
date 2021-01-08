@@ -1,12 +1,20 @@
 import { IField, IMethod } from "../interfaces";
 import Fields from "./Fields";
 
-export function module(moduleName: string, fieldsInterfaceTS: string, parameterInterfacesTS: string, methodsClassTS: string, methodNames: string[]) {
+export function module(
+    moduleName: string,
+    fieldsInterfaceTS: string,
+    parameterInterfacesTS: string,
+    methodsClassTS: string,
+    methodNames: string[]
+) {
     return `
-import {IOptions} from "../client/client";
-import {IStandardParameters} from "../client/IStandardParameters";
-import {IStandardResponse} from "../client/IStandardResponse";
-import {request} from "../client/client";
+import {AxiosRequestConfig, AxiosResponse } from "axios";
+import {IOAuthTokens} from "../types/IOAuthTokens";
+import {IStandardParameters} from "../types/IStandardParameters";
+import {IStandardResponse} from "../types/IStandardResponse";
+import {Token} from "oauth-1.0a";
+import {request} from "../client/Request";
 
 //fields
 ${fieldsInterfaceTS.trim()}
@@ -19,40 +27,59 @@ ${methodsClassTS.trim()}
 `.trim();
 }
 
-export function index(moduleNames: string[]) {
+export function entities(moduleNames: string[]) {
     return `
-export {IOptions} from "./client/client";
-export * from "./client/IStandardParameters";
-export * from "./client/IStandardResponse";
-${moduleNames.map(m => exportModule(m, "./api")).join("\n")}
+import { AxiosRequestConfig } from "axios";
+import { Token } from "oauth-1.0a";
+${moduleNames.map(m => importEntityClass(m, "../api")).join("\n")}
+
+export class Entities {
+    constructor(
+        private axiosConfig: AxiosRequestConfig,
+        private apiKeys: Token
+    ) {
+    }
+
+    ${moduleNames.map(m => createEntityInstanceAsProperty(m)).join("\n")}
+}
 `.trim();
 }
 
-export function exportModule(moduleName: string, relativePath: string) {
-    return `export * from "${relativePath}/${moduleName}";`
+export function importEntityClass(moduleName: string, relativePath: string) {
+    return `import {${moduleName}} from "${relativePath}/${moduleName}";`
 }
 
-export function interfaceTemplate(name: string, extendsTS: string, fieldsTS: string) {
+export function createEntityInstanceAsProperty(entityName: string) {
+    return `${entityName} = new ${entityName}(this.axiosConfig, this.apiKeys);`
+}
+
+export function interfaceTemplate(name: string, fieldsTS: string) {
     return `
-export interface ${name} ${extendsTS} {
+export interface ${name} {
     ${fieldsTS}
 }`.trim();
 }
 
 export function methodClassTemplate(name: string, methodsTS: string) {
     return `export class ${name} { 
+    constructor(
+        private readonly config: AxiosRequestConfig,
+        private readonly apiKeys: Token
+    ) {
+    }
+    
     ${methodsTS}
 }
 `.trim();
 }
 
-export function methodTemplate(method: IMethod, parametersInterfaceName: string) {
+export function methodTemplate(method: IMethod, specificParams: string) {
     return `
 /**
 * ${method.synopsis}
 */
-static ${method.methodName} <TResult>(parameters: ${parametersInterfaceName}, options?: IOptions): Promise<IStandardResponse<${parametersInterfaceName}, TResult>> {
-    return request<${parametersInterfaceName}, TResult>("${method.uri}", parameters, "${method.httpMethod}", options);
+async ${method.methodName} <TResult>(params: ${specificParams} & IStandardParameters, oauth?: IOAuthTokens): Promise<AxiosResponse<IStandardResponse<${specificParams}, TResult>>> {
+    return request<${specificParams}, TResult>({ ...this.config, url: "${method.uri}", method: "${method.httpMethod}" }, params, {...{apiKeys: this.apiKeys}, ...oauth});
 }`.trim();
 }
 
