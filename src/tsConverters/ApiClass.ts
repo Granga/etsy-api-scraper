@@ -6,8 +6,14 @@ import { methodClassTemplate } from "./Templates";
 
 export default class ApiModule {
 
-    static toTypescript(name: string, fields: IField[], methods: IMethod[]) {
+    static exportCode(name: string, methods: IMethod[]) {
+        let fieldsInterfaceName = `I${name}`;
+        let parametersInterfaceNames = methods.map(method => this.toInterfaceName(method.methodName));
 
+        return `export {${[fieldsInterfaceName, ...parametersInterfaceNames].join(", ")}} from "./${name}"`;
+    }
+
+    static toTypescript(name: string, fields: IField[], methods: IMethod[]) {
         let fieldsTS = Fields.toTypescript(fields, "parameters");
         let fieldsInterface = templates.interfaceTemplate(`I${name}`, fieldsTS);
 

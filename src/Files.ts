@@ -8,6 +8,7 @@ export default class Files {
     static jsonDir = Path.join(Files.outputDir, "/json");
     static etsyTsSrcDir = Path.join("../", "/etsy-ts/src");
     static apiDir = Path.join(Files.etsyTsSrcDir, "api");
+    static apiIndexPath = Path.join(Files.apiDir, "index.ts");
     static entitiesPath = Path.join(Files.etsyTsSrcDir, "client", "Entities.ts");
 
     static createDirs() {
@@ -19,7 +20,7 @@ export default class Files {
         });
     }
 
-    static write(type: "html" | "entityJson" | "api" | "reExports", name: string, content: string) {
+    static write(type: "html" | "entityJson" | "api" | "apiIndex", name: string, content: string) {
         let path = this.getPath(type, name);
 
         let dir = Path.dirname(path);
@@ -43,7 +44,7 @@ export default class Files {
         return fs.readFileSync(path).toString();
     }
 
-    static getPath(type: "html" | "entityJson" | "api" | "reExports", name: string): string {
+    static getPath(type: "html" | "entityJson" | "api" | "apiIndex", name: string): string {
         switch (type) {
             case "html":
                 return Path.join(this.htmlDir, `${name}.html`);
@@ -54,8 +55,8 @@ export default class Files {
             case "api":
                 return Path.join(this.apiDir, `${upperFirst(name)}.ts`);
 
-            case "reExports":
-                return Path.join(this.etsyTsSrcDir, "index.ts");
+            case "apiIndex":
+                return Path.join(this.apiIndexPath);
 
             default:
                 console.warn("Unknown type");
@@ -69,20 +70,6 @@ export default class Files {
             default:
                 console.warn("Unknown type");
         }
-    }
-
-    static createReExportsFile() {
-        let dirs = this.getDirectories(this.etsyTsSrcDir);
-        let ts = "";
-
-        for (let dir of dirs) {
-            let files = fs.readdirSync(Path.join(this.etsyTsSrcDir, dir));
-            ts += files.reduce<string>((ts, file) => {
-                return ts + `export * from "./${dir}/${file.slice(0, -3)}";\n`;
-            }, "");
-        }
-
-        this.write("reExports", null, ts);
     }
 
     private static getDirectories(srcpath) {

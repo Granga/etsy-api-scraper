@@ -45,6 +45,24 @@ export class Entities {
 `.trim();
 }
 
+export function apiIndex(moduleNames: string[]) {
+    return `
+import { AxiosRequestConfig } from "axios";
+import { Token } from "oauth-1.0a";
+${moduleNames.map(m => importEntityClass(m, "../api")).join("\n")}
+
+export class Entities {
+    constructor(
+        private axiosConfig: AxiosRequestConfig,
+        private apiKeys: Token
+    ) {
+    }
+
+    ${moduleNames.map(m => createEntityInstanceAsProperty(m)).join("\n")}
+}
+`.trim();
+}
+
 export function importEntityClass(moduleName: string, relativePath: string) {
     return `import {${moduleName}} from "${relativePath}/${moduleName}";`
 }
@@ -53,10 +71,10 @@ export function createEntityInstanceAsProperty(entityName: string) {
     return `${entityName} = new ${entityName}(this.axiosConfig, this.apiKeys);`
 }
 
-export function interfaceTemplate(name: string, fieldsTS: string) {
+export function interfaceTemplate(name: string, body: string) {
     return `
 export interface ${name} {
-    ${fieldsTS}
+    ${body}
 }`.trim();
 }
 
@@ -78,8 +96,8 @@ export function methodTemplate(method: IMethod, specificParams: string) {
 /**
 * ${method.synopsis}
 */
-async ${method.methodName} <TResult>(params: ${specificParams} & IStandardParameters, oauth?: IOAuthTokens): Promise<AxiosResponse<IStandardResponse<${specificParams}, TResult>>> {
-    return request<${specificParams}, TResult>({ ...this.config, url: "${method.uri}", method: "${method.httpMethod}" }, params, {...{apiKeys: this.apiKeys}, ...oauth});
+async ${method.methodName} <TResult>(params: ${specificParams} & IStandardParameters, options ?: (IOAuthTokens & { axiosConfig?: AxiosRequestConfig })): Promise<AxiosResponse<IStandardResponse<${specificParams}, TResult>>> {
+    return request<${specificParams}, TResult>({ ...this.config, ...options?.axiosConfig, url: "${method.uri}", method: "${method.httpMethod}" }, params, {...{apiKeys: this.apiKeys}, ...options});
 }`.trim();
 }
 

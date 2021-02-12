@@ -29,6 +29,7 @@ export default class Scraper {
         let fileNames = Files.getFileList("html");
         let moduleNames: string[] = [];
 
+        let apiIndexCode = "";
         fileNames.forEach((fileName, index) => {
             console.log(`--> ${index + 1}/${fileNames.length} ${fileName}`);
             let $ = cheerio.load(Files.read("html", fileName));
@@ -39,13 +40,16 @@ export default class Scraper {
             let methods = MethodsParser.parse($);
             let fields = FieldsParser.parse($, $("#resource_fields").eq(0));
 
-            let ts = ApiClass.toTypescript(moduleName, fields, methods);
+            let moduleCode = ApiClass.toTypescript(moduleName, fields, methods);
+            let exportLineCode = ApiClass.exportCode(moduleName, methods)
 
-            Files.write("api", moduleName, ts);
+            Files.write("api", moduleName, moduleCode);
+            apiIndexCode += exportLineCode + "\n";
         });
 
         let entities = templates.entities(moduleNames);
 
+        fs.writeFileSync(Files.apiIndexPath, apiIndexCode);
         fs.writeFileSync(Files.entitiesPath, entities);
     }
 
