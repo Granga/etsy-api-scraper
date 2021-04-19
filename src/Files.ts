@@ -9,7 +9,7 @@ export default class Files {
     static etsyTsSrcDir = Path.join("../", "/etsy-ts/src");
     static apiDir = Path.join(Files.etsyTsSrcDir, "api");
     static apiIndexPath = Path.join(Files.apiDir, "index.ts");
-    static entitiesPath = Path.join(Files.etsyTsSrcDir, "client", "Entities.ts");
+    static entitiesPath = Path.join(Files.etsyTsSrcDir, "client", "Etsy.ts");
 
     static createDirs() {
         let dirs = [this.outputDir, this.htmlDir, this.jsonDir, this.apiDir];
